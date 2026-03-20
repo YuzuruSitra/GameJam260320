@@ -57,7 +57,17 @@ public class MouseFollowMovement : MonoBehaviour
         if (distance > stopRadius)
         {
             Vector2 dir = toMouse.normalized;
-            _rb.linearVelocity = dir * moveSpeed;
+            Vector2 desiredMove = dir * moveSpeed * Time.fixedDeltaTime;
+
+            // Clamp so we never overshoot the cursor
+            if (desiredMove.magnitude > distance)
+                desiredMove = toMouse;
+
+            // MovePosition respects colliders and physics — no tunneling through fences
+            _rb.MovePosition(_rb.position + desiredMove);
+
+            // Zero out any residual velocity so physics forces don't keep pushing us
+            _rb.linearVelocity = Vector2.zero;
 
             // Flip sprite based on horizontal direction
             if (_sr != null && Mathf.Abs(dir.x) > 0.01f)

@@ -29,6 +29,7 @@ public class ProjectileSpawner : MonoBehaviour
     private float _spawnSize;
     private PollenGauge _gauge;
     private SpriteRenderer _sr;
+    private Animator _animator;
 
     // ─────────────────────────────────────────────────────────────────────────
     void Awake()
@@ -36,6 +37,7 @@ public class ProjectileSpawner : MonoBehaviour
         _cam = Camera.main;
         _gauge = GetComponent<PollenGauge>();
         _sr = GetComponent<SpriteRenderer>();
+        _animator = GetComponent<Animator>();
         _spawnInterval = maxSpawnInterval;
         _spawnSize = minSpawnSize;
         _timer = _spawnInterval;
@@ -97,6 +99,11 @@ public class ProjectileSpawner : MonoBehaviour
 
         GameObject spawned = Instantiate(projectilePrefab, spawnPos, rotation);
         spawned.transform.localScale = Vector3.one * _spawnSize;
+
+        // Trigger attack animation — Animator will return to idle automatically
+        // via the transition's Exit Time or an Idle transition in the Animator
+        if (_animator != null)
+            _animator.SetTrigger("Attack");
     }
 
     // ─────────────────────────────────────────────────────────────────────────

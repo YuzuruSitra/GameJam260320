@@ -104,12 +104,14 @@ GameObject:
   - component: {fileID: 6323616739901478147}
   - component: {fileID: 8027437466621553440}
   - component: {fileID: 1670074920769916271}
-  - component: {fileID: 1587627996080058378}
   - component: {fileID: 5252153631992657248}
   - component: {fileID: 7058357592339873665}
+  - component: {fileID: 7651637605923226014}
+  - component: {fileID: 499010120036691642}
+  - component: {fileID: 1934574861876990114}
   m_Layer: 0
   m_Name: PlayerPrefab
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -124,7 +126,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.3, y: 0.3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6323616739775396547}
@@ -179,7 +181,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 1f2b808deed244e18d31ba3c25ad903b, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 58e70c30dd5c6da458c0a9c5f837b6ba, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -197,7 +199,7 @@ Animator:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6323616739901478146}
-  m_Enabled: 1
+  m_Enabled: 0
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: 2f3caa9104174133b9ad4de1734b5eaf, type: 2}
   m_CullingMode: 0
@@ -237,33 +239,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   moveSpeed: 3
   stopRadius: 1
---- !u!50 &1587627996080058378
-Rigidbody2D:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6323616739901478146}
-  m_BodyType: 0
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_GravityScale: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 0
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 0
+  minSpeed: 2
+  maxSpeed: 5
 --- !u!70 &5252153631992657248
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -314,5 +291,72 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   projectilePrefab: {fileID: 4062496106243499295, guid: aafe3e6e76368e24fa6e742abee04b38, type: 3}
-  spawnInterval: 3
+  maxSpawnInterval: 3
+  minSpawnInterval: 0.5
+  minSpawnSize: 0.2
+  maxSpawnSize: 1.5
   spawnDistance: 1.5
+--- !u!114 &7651637605923226014
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6323616739901478146}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fad62f8456094f58be199c58e89c131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Pollen.PollenGauge
+  maxPollen: 100
+  initialPollen: 30
+--- !u!114 &499010120036691642
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6323616739901478146}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8be0f7d7a436a4adfba9edccd67f7b5e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Pollen.MobPollenGaugeUI
+  AutoCreateUI: 1
+  fillRect: {fileID: 0}
+  worldOffset: {x: 0, y: 1, z: 0}
+  gaugeWidth: 2
+  gaugeHeight: 0.3
+  backgroundColor: {r: 0.15, g: 0.1, b: 0.05, a: 0.85}
+  fillColorFull: {r: 0.85882354, g: 0.16862746, b: 0.08627449, a: 1}
+  fillColorEmpty: {r: 0.99215686, g: 0.3, b: 0.1, a: 1}
+  padX: 0.04
+  padY: 0.04
+  smoothSpeed: 8
+--- !u!50 &1934574861876990114
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6323616739901478146}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
