@@ -68,6 +68,10 @@ namespace Mob
         {
             if (_pollenGauge != null)
                 _pollenGauge.OnChanged -= HandlePollenChanged;
+
+            // Chase 中だった場合は Registry から除外
+            if (_currentMode == MobMode.Chase && MobRegistry.Instance != null)
+                MobRegistry.Instance.Unregister(this);
         }
 
         // ========== Public API ==========
