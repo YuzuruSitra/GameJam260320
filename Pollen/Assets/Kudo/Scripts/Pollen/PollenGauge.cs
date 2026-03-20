@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Mob
+namespace Pollen
 {
     /// <summary>
     /// 花粉ゲージ（体力ゲージ）の増減を管理する。

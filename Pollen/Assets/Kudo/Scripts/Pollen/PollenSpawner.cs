@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Pool;
 
-namespace Mob
+namespace Pollen
 {
     /// <summary>
     /// 花粉の玉を画面端からランダムに生成し続けるスポナー。

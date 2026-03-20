@@ -18,7 +18,7 @@ namespace Mob
     [RequireComponent(typeof(PatrolBehavior))]
     [RequireComponent(typeof(ChaseBehavior))]
     [RequireComponent(typeof(MobAnimator))]
-    [RequireComponent(typeof(PollenGauge))]
+    [RequireComponent(typeof(Pollen.PollenGauge))]
     public class MobController : MonoBehaviour
     {
         [Header("Initial Mode")]
@@ -28,7 +28,7 @@ namespace Mob
         private PatrolBehavior _patrol;
         private ChaseBehavior  _chase;
         private MobAnimator    _mobAnimator;
-        private PollenGauge    _pollenGauge;
+        private Pollen.PollenGauge    _pollenGauge;
 
         // ---- State ----
         private IMobBehavior _currentBehavior;
@@ -43,7 +43,7 @@ namespace Mob
             _patrol      = GetComponent<PatrolBehavior>();
             _chase       = GetComponent<ChaseBehavior>();
             _mobAnimator = GetComponent<MobAnimator>();
-            _pollenGauge = GetComponent<PollenGauge>();
+            _pollenGauge = GetComponent<Pollen.PollenGauge>();
         }
 
         private void Start()
