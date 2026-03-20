@@ -6,7 +6,13 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
-    guid: 8c9cfa26abfee488c85f1582747f6a02
+    path: Assets/Yujin/Scene/Title.unity
+    guid: 3134ba0656baee8408f92dee7e831554
+  - enabled: 1
+    path: Assets/Yujin/Scene/Main.unity
+    guid: 1cef76eb8c37821409412ff68eabcda3
+  - enabled: 1
+    path: Assets/Yujin/Scene/Result.unity
+    guid: 890b82d687ba65f4fae1aa6fdec2436b
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
