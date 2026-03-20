@@ -139,6 +139,6 @@ MonoBehaviour:
   swayAmplitudeVariance: 0.2
   swayFrequencyVariance: 0.4
   pollenForPlayer: 10
-  pollenForMob: 5
+  pollenForMob: 10
   spawnMargin: 0.5
   directionSpread: 30
