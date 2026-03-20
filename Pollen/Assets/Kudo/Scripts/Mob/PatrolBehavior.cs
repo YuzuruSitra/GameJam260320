@@ -52,13 +52,25 @@ namespace Mob
 
         public void Execute() { }   // 移動は Coroutine で制御
 
-        public void OnModeChanged()
+        /// <summary>Patrol モードに入ったときの初期化。コルーチンを起動する。</summary>
+        public void OnEnter()
         {
             StopAllCoroutines();
             _origin      = WorldToCell(transform.position);
             _currentCell = _origin;
             StartCoroutine(PatrolRoutine());
         }
+
+        /// <summary>Patrol モードを離れるときの終了処理。コルーチンを確実に停止する。</summary>
+        public void OnExit()
+        {
+            StopAllCoroutines();
+            _mobAnimator?.PlayIdle();
+        }
+
+        // OnModeChanged は MobController が OnEnter/OnExit を直接呼ぶため不要だが
+        // インターフェース互換のために残す場合は OnEnter に委譲する
+        public void OnModeChanged() => OnEnter();
 
         // ========== Coroutine ==========
 
@@ -68,19 +80,13 @@ namespace Mob
             {
                 yield return new WaitForSeconds(waitInterval);
 
-                // 方向と距離をまとめて決定する
                 if (!TryPickMove(out Vector2Int direction, out int steps))
-                    continue;   // 全方向が範囲外 → 待機してリトライ
+                    continue;
 
-                // 決定した方向で steps マス連続移動
                 yield return StartCoroutine(MoveSteps(direction, steps));
             }
         }
 
-        /// <summary>
-        /// direction × steps マスを一定速度で連続移動する。
-        /// アニメは移動開始時に 1 回だけ切り替え、完了後に Idle へ戻す。
-        /// </summary>
         private IEnumerator MoveSteps(Vector2Int direction, int steps)
         {
             _mobAnimator?.PlayWalk(direction);
@@ -107,11 +113,6 @@ namespace Mob
 
         // ========== Helpers ==========
 
-        /// <summary>
-        /// 移動可能な方向と距離をランダムに決定する。
-        /// 方向をシャッフルし、最初に有効だった方向を採用。
-        /// 距離は「その方向に実際に進める最大数」と maxSteps の小さい方を上限にランダム決定。
-        /// </summary>
         private bool TryPickMove(out Vector2Int direction, out int steps)
         {
             direction = Vector2Int.zero;
@@ -119,7 +120,6 @@ namespace Mob
 
             foreach (var d in ShuffledDirections())
             {
-                // この方向に何マス進めるか計算（少なくとも 1 マス進める方向のみ対象）
                 int reachable = CountReachableSteps(d);
                 if (reachable < 1) continue;
 
@@ -131,15 +131,13 @@ namespace Mob
                 return true;
             }
 
-            return false;   // 全方向が範囲外
+            return false;
         }
 
-        /// <summary>指定方向に範囲内で進める最大マス数を返す。</summary>
         private int CountReachableSteps(Vector2Int dir)
         {
             int count = 0;
             Vector2Int cell = _currentCell;
-            // patrolRange * 2 を上限に 1 マスずつ確認（実質的に patrolRange が上限になる）
             for (int i = 0; i < patrolRange * 2; i++)
             {
                 cell += dir;
@@ -167,7 +165,6 @@ namespace Mob
             return arr;
         }
 
-        // グリッド ⇔ ワールド変換（1 マス = 1 Unit 想定）
         private static Vector2Int WorldToCell(Vector3 pos) => new Vector2Int(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.y));
         private static Vector3   CellToWorld(Vector2Int c) => new Vector3(c.x, c.y, 0f);
 

@@ -19,9 +19,7 @@ namespace Mob
         [SerializeField] private float stopDistance = 0.5f;
 
         private MobAnimator _mobAnimator;
-
-        // 前フレームのアニメ方向（変化時のみ更新）
-        private Vector2Int _lastAnimDir = Vector2Int.down;
+        private Vector2Int  _lastAnimDir = Vector2Int.down;
 
         private void Awake()
         {
@@ -43,11 +41,9 @@ namespace Mob
                 return;
             }
 
-            // 移動
             Vector2 dir = toTarget.normalized;
             transform.position += (Vector3)(dir * (moveSpeed * Time.deltaTime));
 
-            // アニメ方向: 4 方向に量子化して変化した時のみ更新
             Vector2Int animDir = QuantizeDirection(dir);
             if (animDir != _lastAnimDir)
             {
@@ -56,9 +52,9 @@ namespace Mob
             }
         }
 
-        public void OnModeChanged()
+        /// <summary>Chase モードに入ったときの初期化。ターゲットを自動取得する。</summary>
+        public void OnEnter()
         {
-            // ターゲットを自動取得
             if (target == null)
             {
                 GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -72,9 +68,16 @@ namespace Mob
             _mobAnimator?.PlayIdle();
         }
 
+        /// <summary>Chase モードを離れるときの終了処理（現仕様では呼ばれないが実装しておく）。</summary>
+        public void OnExit()
+        {
+            _mobAnimator?.PlayIdle();
+        }
+
+        public void OnModeChanged() => OnEnter();
+
         // ========== Helpers ==========
 
-        /// <summary>連続ベクトルを上下左右の 4 方向に量子化する。</summary>
         private static Vector2Int QuantizeDirection(Vector2 dir)
         {
             if (Mathf.Abs(dir.x) >= Mathf.Abs(dir.y))

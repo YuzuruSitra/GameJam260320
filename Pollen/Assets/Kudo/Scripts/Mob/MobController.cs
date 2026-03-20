@@ -1,34 +1,40 @@
+using Pollen;
 using UnityEngine;
 
 namespace Mob
 {
     /// <summary>
     /// Mob の司令塔。
-    /// PatrolBehavior / ChaseBehavior を切り替えながら
-    /// MobAnimator・PollenGauge と協調する。
+    /// モード切替時に前の Behavior の OnExit() → 次の Behavior の OnEnter() を
+    /// 確実に呼ぶことでコルーチンの停止漏れを防ぐ。
+    ///
+    /// ---- モード自動切替ルール ----
+    ///   Patrol 中に花粉ゲージが満タン → Chase へ一方的に遷移（以降は戻らない）
     ///
     /// ---- GameObject 構成 ----
     /// [MobRoot]
-    ///   ├─ MobController   (このスクリプト)
+    ///   ├─ MobController
     ///   ├─ PatrolBehavior
     ///   ├─ ChaseBehavior
     ///   ├─ MobAnimator
-    ///   └─ PollenGauge
+    ///   ├─ PollenGauge
+    ///   └─ MobPollenGaugeUI
     /// </summary>
     [RequireComponent(typeof(PatrolBehavior))]
     [RequireComponent(typeof(ChaseBehavior))]
     [RequireComponent(typeof(MobAnimator))]
-    [RequireComponent(typeof(Pollen.PollenGauge))]
+    [RequireComponent(typeof(PollenGauge))]
     public class MobController : MonoBehaviour
     {
         [Header("Initial Mode")]
         [SerializeField] private MobMode initialMode = MobMode.Patrol;
 
         // ---- Components ----
-        private PatrolBehavior _patrol;
-        private ChaseBehavior  _chase;
-        private MobAnimator    _mobAnimator;
-        private Pollen.PollenGauge    _pollenGauge;
+        private PatrolBehavior   _patrol;
+        private ChaseBehavior    _chase;
+        private MobAnimator      _mobAnimator;
+        private PollenGauge      _pollenGauge;
+        private MobPollenGaugeUI _gaugeUI;
 
         // ---- State ----
         private IMobBehavior _currentBehavior;
@@ -43,16 +49,13 @@ namespace Mob
             _patrol      = GetComponent<PatrolBehavior>();
             _chase       = GetComponent<ChaseBehavior>();
             _mobAnimator = GetComponent<MobAnimator>();
-            _pollenGauge = GetComponent<Pollen.PollenGauge>();
+            _pollenGauge = GetComponent<PollenGauge>();
+            _gaugeUI     = GetComponent<MobPollenGaugeUI>();
         }
 
         private void Start()
         {
-            // 花粉ゲージのイベント購読
-            _pollenGauge.OnDepleted += HandlePollenDepleted;
-            _pollenGauge.OnChanged  += HandlePollenChanged;
-
-            // 初期モード適用
+            _pollenGauge.OnChanged += HandlePollenChanged;
             SwitchMode(initialMode);
         }
 
@@ -64,20 +67,25 @@ namespace Mob
         private void OnDestroy()
         {
             if (_pollenGauge != null)
-            {
-                _pollenGauge.OnDepleted -= HandlePollenDepleted;
-                _pollenGauge.OnChanged  -= HandlePollenChanged;
-            }
+                _pollenGauge.OnChanged -= HandlePollenChanged;
         }
 
         // ========== Public API ==========
 
-        /// <summary>Mob の行動モードを切り替える。</summary>
+        /// <summary>
+        /// Mob の行動モードを切り替える。
+        /// 1. 現在の Behavior の OnExit() を呼んでコルーチン等を停止
+        /// 2. 次の Behavior の OnEnter() を呼んで初期化
+        /// </summary>
         public void SwitchMode(MobMode newMode)
         {
             if (_currentMode == newMode && _currentBehavior != null) return;
 
-            _currentMode = newMode;
+            // --- 現在の Behavior を終了 ---
+            _currentBehavior?.OnExit();
+
+            // --- 次の Behavior を開始 ---
+            _currentMode     = newMode;
             _currentBehavior = newMode switch
             {
                 MobMode.Patrol => _patrol,
@@ -85,32 +93,29 @@ namespace Mob
                 _              => _patrol
             };
 
-            _currentBehavior.OnModeChanged();
+            _currentBehavior.OnEnter();
             Debug.Log($"[MobController] Mode → {newMode}");
         }
-
-        // ---- 花粉ゲージ操作（外部から呼ぶ用） ----
 
         public void AddPollen(float amount)    => _pollenGauge.Add(amount);
         public void ReducePollen(float amount) => _pollenGauge.Reduce(amount);
 
         // ========== Private Callbacks ==========
 
-        private void HandlePollenDepleted()
-        {
-            Debug.Log("[MobController] 花粉ゲージが 0 になりました。");
-            // 例: 死亡演出・非アクティブ化など
-            // gameObject.SetActive(false);
-        }
-
         private void HandlePollenChanged(float current, float max)
         {
-            // UI や VFX への通知などを記述
-            // Debug.Log($"[MobController] 花粉: {current}/{max} ({_pollenGauge.Ratio:P0})");
-            if (Mathf.Approximately(current, max))
-            {
-                SwitchMode(MobMode.Chase);
-            }
+            if (!_pollenGauge.IsFull) return;
+
+            Debug.Log("[MobController] 花粉ゲージ満タン → Chase 開始（永続）");
+
+            // 以降のゲージ変動を関知しない
+            _pollenGauge.OnChanged -= HandlePollenChanged;
+
+            // UI を非表示
+            if (_gaugeUI != null)
+                _gaugeUI.AutoCreateUI = false;
+
+            SwitchMode(MobMode.Chase);
         }
     }
 }

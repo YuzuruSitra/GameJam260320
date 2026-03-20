@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Pollen
@@ -35,9 +36,10 @@ namespace Pollen
         //  インスペクタ設定
         // ================================================================
 
+        [FormerlySerializedAs("autoCreateUI")]
         [Header("Auto Build UI")]
         [Tooltip("true: Start() で Hierarchy を自動生成 / false: 手動アサイン")]
-        [SerializeField] private bool autoCreateUI = true;
+        public bool AutoCreateUI = true;
 
         [Header("Manual References (autoCreateUI = false の時のみ使用)")]
         [SerializeField] private RectTransform fillRect;   // Fill の RectTransform
@@ -91,7 +93,7 @@ namespace Pollen
 
         private void Start()
         {
-            if (autoCreateUI)
+            if (AutoCreateUI)
                 BuildUI();
 
             // 初期値を即時反映（Smooth なし）
