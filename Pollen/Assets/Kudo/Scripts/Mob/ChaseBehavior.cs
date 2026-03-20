@@ -5,30 +5,38 @@ namespace Mob
     /// <summary>
     /// モード2: MobRegistry に登録された順番で前の Mob（または Player）を追従する。
     ///
-    /// ---- 追従ルール ----
-    ///   自分の登録番号 = 0  → Player を直接追従
-    ///   自分の登録番号 = N  → 番号 N-1 の Mob を追従
+    /// ---- 速度同期 ----
+    ///   Player の MouseFollowMovement.moveSpeed をそのまま使用する。
+    ///   参照は OnEnter 時に MobRegistry.PlayerTransform の GameObject から取得し、
+    ///   Execute() で毎フレーム最新値を読み取る。
+    ///   取得できない場合は fallbackMoveSpeed にフォールバックする。
     /// </summary>
     public class ChaseBehavior : MonoBehaviour, IMobBehavior
     {
         [Header("Chase Settings")]
-        [Tooltip("移動速度（Units/秒）")]
-        [SerializeField] private float moveSpeed = 3.0f;
+        [Tooltip("Player の MouseFollowMovement が取得できない場合の代替速度（Units/秒）")]
+        [SerializeField] private float fallbackMoveSpeed = 3.0f;
 
         [Tooltip("この距離以内に入ったら停止")]
         [SerializeField] private float stopDistance = 0.5f;
 
-        [Tooltip("追従ターゲットを再取得する間隔（秒）。Unregister 後の繰り上がりに対応")]
+        [Tooltip("追従ターゲットを再取得する間隔（秒）")]
         [SerializeField] private float targetUpdateInterval = 0.3f;
 
-        // ---- 内部状態 ----
-        private MobController _mobController;
-        private MobAnimator   _mobAnimator;
-        private Vector2Int    _lastAnimDir = Vector2Int.down;
+        // ---- 内部参照 ----
+        private MobController        _mobController;
+        private MobAnimator          _mobAnimator;
+        private MouseFollowMovement  _playerMovement;   // Player の速度参照元
 
-        private int       _myIndex      = -1;
-        private Transform _followTarget;
-        private float     _targetTimer;
+        // ---- 内部状態 ----
+        private Vector2Int _lastAnimDir = Vector2Int.down;
+        private int        _myIndex     = -1;
+        private Transform  _followTarget;
+        private float      _targetTimer;
+
+        /// <summary>現在の移動速度。Player の moveSpeed と同期、取得不可時は fallback。</summary>
+        private float CurrentSpeed =>
+            _playerMovement != null ? _playerMovement.moveSpeed : fallbackMoveSpeed;
 
         // ========== Unity ==========
 
@@ -42,7 +50,6 @@ namespace Mob
 
         public void Execute()
         {
-            // 一定間隔でターゲットを再取得（Unregister 後の繰り上がり対応）
             _targetTimer -= Time.deltaTime;
             if (_targetTimer <= 0f)
             {
@@ -62,7 +69,7 @@ namespace Mob
             }
 
             Vector2 dir = toTarget.normalized;
-            transform.position += (Vector3)(dir * (moveSpeed * Time.deltaTime));
+            transform.position += (Vector3)(dir * (CurrentSpeed * Time.deltaTime));
 
             Vector2Int animDir = QuantizeDirection(dir);
             if (animDir != _lastAnimDir)
@@ -74,33 +81,43 @@ namespace Mob
 
         public void OnEnter()
         {
-            // Registry に登録して番号を取得
             if (MobRegistry.Instance != null)
+            {
                 _myIndex = MobRegistry.Instance.Register(_mobController);
+
+                // Player の MouseFollowMovement を取得
+                Transform playerTransform = MobRegistry.Instance.PlayerTransform;
+                if (playerTransform != null)
+                {
+                    _playerMovement = playerTransform.GetComponent<MouseFollowMovement>();
+                    if (_playerMovement == null)
+                        Debug.LogWarning("[ChaseBehavior] Player に MouseFollowMovement が見つかりません。fallbackMoveSpeed を使用します。");
+                }
+            }
             else
+            {
                 Debug.LogWarning("[ChaseBehavior] MobRegistry が見つかりません。");
+            }
 
             _lastAnimDir = Vector2Int.down;
-            _targetTimer = 0f;   // 即時ターゲット取得
+            _targetTimer = 0f;
             _mobAnimator?.PlayIdle();
         }
 
         public void OnExit()
         {
             _mobAnimator?.PlayIdle();
-            _followTarget = null;
+            _followTarget   = null;
+            _playerMovement = null;
         }
 
         public void OnModeChanged() => OnEnter();
 
         // ========== Private ==========
 
-        /// <summary>Registry から現在のインデックスを再取得してターゲットを更新する。</summary>
         private void RefreshTarget()
         {
             if (MobRegistry.Instance == null) return;
-
-            // Unregister が起きてインデックスがずれている可能性があるため毎回確認
             _myIndex      = MobRegistry.Instance.GetIndex(_mobController);
             _followTarget = MobRegistry.Instance.GetFollowTarget(_myIndex);
         }
