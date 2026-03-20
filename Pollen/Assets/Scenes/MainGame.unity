@@ -466,6 +466,38 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1670074920769916271, guid: cd292e4341ea88844a1234f35eb2ea24, type: 3}
+      propertyPath: maxSpeed
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1670074920769916271, guid: cd292e4341ea88844a1234f35eb2ea24, type: 3}
+      propertyPath: minSpeed
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6323616739901478144, guid: cd292e4341ea88844a1234f35eb2ea24, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 58e70c30dd5c6da458c0a9c5f837b6ba, type: 3}
+    - target: {fileID: 6323616739901478144, guid: cd292e4341ea88844a1234f35eb2ea24, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6323616739901478144, guid: cd292e4341ea88844a1234f35eb2ea24, type: 3}
+      propertyPath: m_Color.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6323616739901478144, guid: cd292e4341ea88844a1234f35eb2ea24, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6323616739901478145, guid: cd292e4341ea88844a1234f35eb2ea24, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6323616739901478145, guid: cd292e4341ea88844a1234f35eb2ea24, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.3
+      objectReference: {fileID: 0}
     - target: {fileID: 6323616739901478145, guid: cd292e4341ea88844a1234f35eb2ea24, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -513,6 +545,22 @@ PrefabInstance:
     - target: {fileID: 6323616739901478146, guid: cd292e4341ea88844a1234f35eb2ea24, type: 3}
       propertyPath: m_TagString
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 6323616739901478147, guid: cd292e4341ea88844a1234f35eb2ea24, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7058357592339873665, guid: cd292e4341ea88844a1234f35eb2ea24, type: 3}
+      propertyPath: maxSpawnSize
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7058357592339873665, guid: cd292e4341ea88844a1234f35eb2ea24, type: 3}
+      propertyPath: minSpawnSize
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7058357592339873665, guid: cd292e4341ea88844a1234f35eb2ea24, type: 3}
+      propertyPath: minSpawnInterval
+      value: 0.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

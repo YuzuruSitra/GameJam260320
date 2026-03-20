@@ -1,37 +1,53 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Pollen;
 
-/// <summary>
-/// Moves the 2D player toward the mouse cursor in both X and Y (new Input System).
-/// The sprite always stays upright. Attach CameraFollow to the camera separately.
-/// </summary>
 [RequireComponent(typeof(Rigidbody2D))]
 public class MouseFollowMovement : MonoBehaviour
 {
     [Header("Movement")]
-    [Tooltip("Units per second the player moves toward the cursor.")]
     public float moveSpeed = 5f;
 
     [Header("Stop Radius")]
-    [Tooltip("Player stops moving when within this distance of the cursor.")]
     public float stopRadius = 0.5f;
+
+    [Header("Pollen Speed Scaling")]
+    [Tooltip("Player speed when pollen is empty.")]
+    public float minSpeed = 2f;
+    [Tooltip("Player speed when pollen is full.")]
+    public float maxSpeed = 10f;
 
     // ── private ──────────────────────────────────────────────────────────────
     private Rigidbody2D _rb;
     private Camera _cam;
+    private PollenGauge _gauge;
+    private SpriteRenderer _sr;
 
     // ─────────────────────────────────────────────────────────────────────────
     void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
         _cam = Camera.main;
+        _gauge = GetComponent<PollenGauge>();
+        _sr = GetComponent<SpriteRenderer>();
 
-        // Only freeze rotation — both axes are free
         _rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-        // Disable gravity — movement is fully cursor-driven
         _rb.gravityScale = 0f;
     }
 
+    void OnEnable()
+    {
+        if (_gauge != null)
+            _gauge.OnChanged += OnPollenChanged;
+    }
+
+    void OnDisable()
+    {
+        if (_gauge != null)
+            _gauge.OnChanged -= OnPollenChanged;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     void FixedUpdate()
     {
         Vector2 mouseWorld = GetMouseWorldPosition();
@@ -40,15 +56,26 @@ public class MouseFollowMovement : MonoBehaviour
 
         if (distance > stopRadius)
         {
-            _rb.linearVelocity = toMouse.normalized * moveSpeed;
+            Vector2 dir = toMouse.normalized;
+            _rb.linearVelocity = dir * moveSpeed;
+
+            // Flip sprite based on horizontal direction
+            if (_sr != null && Mathf.Abs(dir.x) > 0.01f)
+                _sr.flipX = dir.x < 0f;
         }
         else
         {
             _rb.linearVelocity = Vector2.zero;
         }
 
-        // Keep sprite upright regardless of any external forces
         transform.rotation = Quaternion.identity;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    void OnPollenChanged(float current, float max)
+    {
+        float t = max > 0f ? current / max : 0f;
+        moveSpeed = Mathf.Lerp(minSpeed, maxSpeed, t);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -58,7 +85,6 @@ public class MouseFollowMovement : MonoBehaviour
         return _cam.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, -_cam.transform.position.z));
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
 #if UNITY_EDITOR
     void OnDrawGizmosSelected()
     {
