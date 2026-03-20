@@ -107,6 +107,10 @@ namespace Mob
         {
             // UI や VFX への通知などを記述
             // Debug.Log($"[MobController] 花粉: {current}/{max} ({_pollenGauge.Ratio:P0})");
+            if (Mathf.Approximately(current, max))
+            {
+                SwitchMode(MobMode.Chase);
+            }
         }
     }
 }

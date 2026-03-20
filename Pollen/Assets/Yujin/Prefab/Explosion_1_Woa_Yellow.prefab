@@ -24590,7 +24590,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 373e8da40c56e4902baf12a155c31317, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerShell
-  _pollenForMob: 10
+  _pollenForMob: 50
 --- !u!1 &4341948915075752432
 GameObject:
   m_ObjectHideFlags: 0
