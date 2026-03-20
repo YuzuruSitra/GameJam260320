@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -102,5 +103,8 @@ namespace Mob
 
         /// <summary>Œ»İ‚Ì“o˜^”B</summary>
         public int Count => _chaseList.Count;
+
+        public Action<MobController> OnRegistered { get; internal set; }
+        public Action<MobController> OnUnregistered { get; internal set; }
     }
 }

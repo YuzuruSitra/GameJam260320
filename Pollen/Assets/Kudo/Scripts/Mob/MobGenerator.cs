@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,6 +15,9 @@ namespace Mob
     /// </summary>
     public class MobGenerator : MonoBehaviour
     {
+        // ---- Singleton ----
+        public static MobGenerator Instance { get; private set; }
+
         // ================================================================
         //  インスペクタ設定
         // ================================================================
@@ -52,12 +56,36 @@ namespace Mob
         public IReadOnlyList<MobController> SpawnedMobs => _spawnedMobs;
         private readonly List<MobController> _spawnedMobs = new();
 
+        /// <summary>インスペクタで設定した生成数。</summary>
+        public int SpawnCount => spawnCount;
+
+        // / <summary>実際に生成に成功した数。</summary>
+        public int SpawnedCount => _spawnedMobs.Count;
+
+        /// <summary>現在シーンに存在する Mob の総数（破棄されたものは除外）。</summary>
+        public int TotalMobCount { get; private set; }
+
         /// <summary>生成済み座標のキャッシュ（間隔チェック用）。</summary>
         private readonly List<Vector2Int> _usedCells = new();
+
+        // ---- Events ----
+
+        /// <summary>総 Mob 数が変化したときに発火。引数: 変化後の総数。</summary>
+        public event Action<int> OnTotalCountChanged;
 
         // ================================================================
         //  Unity
         // ================================================================
+
+        private void Awake()
+        {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            Instance = this;
+        }
 
         private void Start()
         {
@@ -65,9 +93,14 @@ namespace Mob
                 SpawnAll();
         }
 
+        private void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+        }
+
         // ================================================================
         //  Public API
-        // ================================================================>
+        // ================================================================
 
         /// <summary>spawnCount 体の Mob を一括生成する。</summary>
         public void SpawnAll()
@@ -89,12 +122,15 @@ namespace Mob
             {
                 if (TryGetSpawnCell(center, out Vector2Int cell))
                 {
-                    Vector3 worldPos = new Vector3(cell.x, cell.y, 0f);
+                    Vector3 worldPos  = new Vector3(cell.x, cell.y, 0f);
                     MobController mob = Instantiate(mobPrefab, worldPos, Quaternion.identity);
-                    mob.name = $"Mob_{i:00}";
+                    mob.name          = $"Mob_{i:00}";
 
                     _spawnedMobs.Add(mob);
                     _usedCells.Add(cell);
+
+                    // Mob 破棄時に総数を更新するため OnDestroy フックを登録
+                    mob.OnMobDestroyed += HandleMobDestroyed;
                 }
                 else
                 {
@@ -102,6 +138,7 @@ namespace Mob
                 }
             }
 
+            NotifyTotalCount();
             Debug.Log($"[MobGenerator] 生成完了: {_spawnedMobs.Count} / {spawnCount} 体");
         }
 
@@ -111,28 +148,44 @@ namespace Mob
             foreach (var mob in _spawnedMobs)
             {
                 if (mob != null)
+                {
+                    mob.OnMobDestroyed -= HandleMobDestroyed;
                     Destroy(mob.gameObject);
+                }
             }
             _spawnedMobs.Clear();
             _usedCells.Clear();
+            NotifyTotalCount();
         }
 
         // ================================================================
         //  Internal
         // ================================================================
 
-        /// <summary>
-        /// minSpacing を満たすグリッドセルをランダムに探す。
-        /// 成功時は cell に座標を入れて true を返す。
-        /// </summary>
+        private void HandleMobDestroyed(MobController mob)
+        {
+            mob.OnMobDestroyed -= HandleMobDestroyed;
+            _spawnedMobs.Remove(mob);
+            NotifyTotalCount();
+        }
+
+        private void NotifyTotalCount()
+        {
+            // null になった（破棄済み）エントリを除いた実数を計算
+            TotalMobCount = 0;
+            foreach (var mob in _spawnedMobs)
+                if (mob != null) TotalMobCount++;
+
+            OnTotalCountChanged?.Invoke(TotalMobCount);
+        }
+
         private bool TryGetSpawnCell(Vector2 center, out Vector2Int cell)
         {
             cell = Vector2Int.zero;
 
             for (int attempt = 0; attempt < maxRetries; attempt++)
             {
-                // 円内ランダム点 → グリッド座標に丸める
-                Vector2 randomPoint = center + Random.insideUnitCircle * spawnRadius;
+                Vector2 randomPoint = center + UnityEngine.Random.insideUnitCircle * spawnRadius;
                 Vector2Int candidate = new Vector2Int(
                     Mathf.RoundToInt(randomPoint.x),
                     Mathf.RoundToInt(randomPoint.y));
@@ -147,14 +200,12 @@ namespace Mob
             return false;
         }
 
-        /// <summary>既存の全使用セルから minSpacing 以上離れているか確認する。</summary>
         private bool IsFarEnough(Vector2Int candidate)
         {
             foreach (var used in _usedCells)
             {
                 int dx = Mathf.Abs(candidate.x - used.x);
                 int dy = Mathf.Abs(candidate.y - used.y);
-                // チェビシェフ距離（グリッド的な正方形範囲）で判定
                 if (Mathf.Max(dx, dy) < minSpacing)
                     return false;
             }
@@ -169,11 +220,9 @@ namespace Mob
         {
             Vector3 center = spawnCenter != null ? spawnCenter.position : transform.position;
 
-            // 生成半径
             Gizmos.color = new Color(0.4f, 0.8f, 1f, 0.3f);
             Gizmos.DrawWireSphere(center, spawnRadius);
 
-            // 最低間隔の可視化（各生成済みセル周辺）
             Gizmos.color = new Color(1f, 0.5f, 0.2f, 0.2f);
             foreach (var c in _usedCells)
             {
