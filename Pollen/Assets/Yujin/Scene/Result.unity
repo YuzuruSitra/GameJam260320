@@ -194,6 +194,81 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 41972318}
   m_CullTransparentMesh: 1
+--- !u!1 &641254171
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 641254173}
+  - component: {fileID: 641254172}
+  m_Layer: 5
+  m_Name: MouseInput
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &641254172
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 641254171}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d49ac4b3b5e42447b74e418e708a418, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  minPointsForGesture: 12
+  windowSize: 60
+  minRadius: 0.5
+  radiusTolerance: 0.18
+  degreesRequired: 270
+  maxIdleSeconds: 0.25
+  minMoveDistance: 3
+  detectionCooldown: 0.5
+  OnCircleComplete:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2016025025}
+        m_TargetAssemblyTypeName: MainMenuUI, Assembly-CSharp
+        m_MethodName: StartGame
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 1
+  showDebug: 1
+  trailColor: {r: 0.2, g: 0.8, b: 1, a: 0.8}
+  circleColor: {r: 0, g: 1, b: 0.4, a: 0.8}
+  flashColor: {r: 1, g: 0.9, b: 0, a: 1}
+--- !u!224 &641254173
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 641254171}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 440.2, y: 239.70001}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1534138359
 GameObject:
   m_ObjectHideFlags: 0
@@ -837,3 +912,4 @@ SceneRoots:
   - {fileID: 1534138363}
   - {fileID: 1547226671}
   - {fileID: 2016025024}
+  - {fileID: 641254173}
