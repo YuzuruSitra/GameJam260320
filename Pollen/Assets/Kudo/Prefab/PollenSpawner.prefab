@@ -1,0 +1,144 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8846770922339613475
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2130862567252203967}
+  - component: {fileID: 6370426316899050358}
+  m_Layer: 0
+  m_Name: PollenSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2130862567252203967
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8846770922339613475}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6370426316899050358
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8846770922339613475}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfae045e366f24500ab9ee44210e488f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Mob.PollenSpawner
+  pollenBallPrefab: {fileID: 8770819592401350389, guid: 54d0651e9cf87463e9c212469f8d930a, type: 3}
+  initialPoolSize: 10
+  maxPoolSize: 50
+  baseSpawnRate: 8
+  spawnRateCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0.0042266846
+      value: 0.39916992
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.19951403
+      value: 0.5491478
+      inSlope: 0.008480832
+      outSlope: 0.008480832
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.60373485
+    - serializedVersion: 3
+      time: 0.7784264
+      value: 0.66585594
+      inSlope: 0.7233165
+      outSlope: 0.7233165
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.1675064
+      outWeight: 0.28293163
+    - serializedVersion: 3
+      time: 1.0144806
+      value: 0.9970169
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  baseSpeed: 5
+  speedCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0.0042266846
+      value: 0.39916992
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.19951403
+      value: 0.5491478
+      inSlope: 0.008480832
+      outSlope: 0.008480832
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.60373485
+    - serializedVersion: 3
+      time: 0.7784264
+      value: 0.66585594
+      inSlope: 0.7233165
+      outSlope: 0.7233165
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.1675064
+      outWeight: 0.28293163
+    - serializedVersion: 3
+      time: 1.0144806
+      value: 0.9970169
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  cycleDuration: 180
+  swayAmplitude: 0.3
+  swayFrequency: 0.8
+  swayAmplitudeVariance: 0.2
+  swayFrequencyVariance: 0.4
+  pollenForPlayer: 10
+  pollenForMob: 5
+  spawnMargin: 0.5
+  directionSpread: 30
