@@ -130,9 +130,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6979a11cc510f41158fbc2dbeffb1528, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Mob.ChaseBehavior
-  moveSpeed: 3
+  fallbackMoveSpeed: 3
   stopDistance: 2
   targetUpdateInterval: 0.3
+  sneezePrefab: {fileID: 4062496106243499295, guid: aafe3e6e76368e24fa6e742abee04b38, type: 3}
+  sneezeInterval: 1.5
+  sneezeSpawnDistance: 0.6
 --- !u!95 &7172371989268211797
 Animator:
   serializedVersion: 7

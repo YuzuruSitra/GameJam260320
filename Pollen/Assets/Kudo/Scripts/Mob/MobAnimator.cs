@@ -29,13 +29,13 @@ namespace Mob
         public void PlayWalk(Vector2Int direction)
         {
             SetDirection(direction);
-            _animator.SetBool(ParamIsWalking, true);
+            //_animator.SetBool(ParamIsWalking, true);
         }
 
         /// <summary>待機アニメに切り替える（方向は維持）。</summary>
         public void PlayIdle()
         {
-            _animator.SetBool(ParamIsWalking, false);
+            //_animator.SetBool(ParamIsWalking, false);
         }
 
         // ---- Private ----
@@ -43,8 +43,8 @@ namespace Mob
         /// <summary>Animator の DirX / DirY を更新する。</summary>
         private void SetDirection(Vector2Int dir)
         {
-            _animator.SetFloat(ParamDirX, dir.x);
-            _animator.SetFloat(ParamDirY, dir.y);
+            //_animator.SetFloat(ParamDirX, dir.x);
+            //_animator.SetFloat(ParamDirY, dir.y);
         }
     }
 }

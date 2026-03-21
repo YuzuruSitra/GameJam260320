@@ -91,7 +91,7 @@ public class GameManager : MonoBehaviour
         if (_timeLeft <= 0f)
         {
             _timeLeft = 0f;
-            EndGame(win: true);
+            EndGame(win: false);  // Timer ran out = lose
         }
     }
 

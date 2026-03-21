@@ -1,71 +1,59 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 
 namespace Mob
 {
     /// <summary>
-    /// ‰æ–Êã•”’†‰›‚ÉŠ´õ” / ¶¬”‚ğƒŠƒAƒ‹ƒ^ƒCƒ€•\¦‚·‚éƒVƒbƒN‚È HUDB
-    ///
-    /// ---- ƒrƒWƒ…ƒAƒ‹d—l ----
-    ///   ”¼“§–¾‚ÌˆÃ‚¢ƒpƒlƒ‹ã‚É
-    ///     ƒ‰ƒxƒ‹i¬•¶šj
-    ///     ”’li‘åj/ ‡Œvi¬j
-    ///     Š´õ—¦ƒo[iƒpƒlƒ‹‰º•”j
-    ///   ‚ğ•\¦B
-    ///   ‘SˆõŠ´õ‚Í”’l‚ª“_–Å‚µ‚ÄƒAƒ‰[ƒgF‚É•Ï‚í‚éB
-    ///
-    /// ---- İŒv•ûj ----
-    ///   UnityEngine.UI ‚Ì‚İg—piTextMeshPro •sg—pjB
-    ///   Update ‚Å–ˆƒtƒŒ[ƒ€’l‚ğæ“¾‚µA•Ï‰»‚ª‚ ‚ê‚ÎƒeƒLƒXƒg‚Æƒo[‚¾‚¯XV‚·‚éB
-    ///   Canvas / Image / Text ‚ğƒR[ƒh‚Å©“®¶¬‚·‚é‚½‚ßè“®”z’u‚Í•s—vB
+    /// HUD displayed at the top of the screen showing infected count vs total.
+    /// 
+    /// Win condition  â€” infected count reaches InfectedToWin.
+    /// Lose condition â€” game timer (in GameManager) runs out before that.
     /// </summary>
     public class MobStatusHUD : MonoBehaviour
     {
         // ================================================================
-        //  ƒCƒ“ƒXƒyƒNƒ^İ’è
+        //  Inspector
         // ================================================================
 
+        [Header("Win Condition")]
+        [Tooltip("How many mobs must be infected to trigger a win.")]
+        public int infectedToWin = 10;
+
         [Header("Layout")]
-        [Tooltip("ƒpƒlƒ‹•ipxj")]
-        [SerializeField] private float panelWidth  = 180f;
-        [Tooltip("ƒpƒlƒ‹‚‚³ipxj")]
-        [SerializeField] private float panelHeight = 72f;
-        [Tooltip("‰æ–Êã’[‚©‚ç‚ÌƒIƒtƒZƒbƒgipxj")]
-        [SerializeField] private float topOffset   = 16f;
+        [SerializeField] private float panelWidth = 360f;
+        [SerializeField] private float panelHeight = 144f;
+        [SerializeField] private float topOffset = 32f;
 
         [Header("Colors")]
-        [SerializeField] private Color panelBg        = new Color(0.06f, 0.05f, 0.08f, 0.90f);
-        [SerializeField] private Color panelBorder     = new Color(1f, 1f, 1f, 0.10f);
-        [SerializeField] private Color labelColor      = new Color(1f, 1f, 1f, 0.38f);
-        [SerializeField] private Color valueNormal     = new Color(0.91f, 0.79f, 0.48f, 1f);   // ƒS[ƒ‹ƒh
-        [SerializeField] private Color valueAllInfected = new Color(0.88f, 0.38f, 0.38f, 1f);  // Ô
-        [SerializeField] private Color totalColor      = new Color(1f, 1f, 1f, 0.30f);
-        [SerializeField] private Color barBg           = new Color(1f, 1f, 1f, 0.08f);
+        [SerializeField] private Color panelBg = new Color(0.06f, 0.05f, 0.08f, 0.90f);
+        [SerializeField] private Color panelBorder = new Color(1f, 1f, 1f, 0.10f);
+        [SerializeField] private Color labelColor = new Color(1f, 1f, 1f, 0.38f);
+        [SerializeField] private Color valueNormal = new Color(0.91f, 0.79f, 0.48f, 1f);
+        [SerializeField] private Color valueAllInfected = new Color(0.88f, 0.38f, 0.38f, 1f);
+        [SerializeField] private Color totalColor = new Color(1f, 1f, 1f, 0.30f);
+        [SerializeField] private Color barBg = new Color(1f, 1f, 1f, 0.08f);
 
         [Header("Font Size")]
-        [Tooltip("ƒ‰ƒxƒ‹‚ÌƒtƒHƒ“ƒgƒTƒCƒYipxj")]
-        [SerializeField] private int labelFontSize = 10;
-        [Tooltip("Š´õ”i‘åj‚ÌƒtƒHƒ“ƒgƒTƒCƒYipxj")]
-        [SerializeField] private int valueFontSize = 28;
-        [Tooltip("‡Œv”i¬j‚ÌƒtƒHƒ“ƒgƒTƒCƒYipxj")]
-        [SerializeField] private int totalFontSize = 13;
+        [Tooltip("Single font size used for all text. Adjust until it fits perfectly.")]
+        [SerializeField] private int fontSize = 22;
 
         [Header("Alert Pulse")]
-        [Tooltip("‘SˆõŠ´õ‚É“_–Å‚³‚¹‚é‘¬“xiHzj")]
+        [Tooltip("Pulse speed in Hz when all mobs are infected.")]
         [SerializeField] private float pulseFrequency = 1.4f;
 
         // ================================================================
-        //  “à•”QÆ
+        //  Private refs
         // ================================================================
 
-        private Text  _infectedText;
-        private Text  _totalText;
+        private Text _infectedText;
+        private Text _totalText;
         private Image _barFill;
 
-        private int   _lastInfected = -1;
-        private int   _lastTotal    = -1;
-        private bool  _isAllInfected;
+        private int _lastInfected = -1;
+        private int _lastTotal = -1;
+        private bool _isAllInfected;
         private float _pulseTimer;
+        private bool _ended;
 
         // ================================================================
         //  Unity
@@ -78,20 +66,31 @@ namespace Mob
 
         private void Update()
         {
-            int infected = MobRegistry.Instance != null ? MobRegistry.Instance.Count         : 0;
-            int total    = MobGenerator.Instance != null ? MobGenerator.Instance.SpawnedCount : 0;
+            if (_ended) return;
 
-            // ’l‚ª•Ï‰»‚µ‚½‚Æ‚«‚¾‚¯ UI ‚ğXV
+            int infected = MobRegistry.Instance != null ? MobRegistry.Instance.Count : 0;
+            int total = MobGenerator.Instance != null ? MobGenerator.Instance.SpawnedCount : 0;
+
             if (infected != _lastInfected || total != _lastTotal)
             {
-                _lastInfected  = infected;
-                _lastTotal     = total;
+                _lastInfected = infected;
+                _lastTotal = total;
                 _isAllInfected = total > 0 && infected >= total;
 
                 RefreshDisplay(infected, total);
+
+                // â”€â”€ Win: infected count reached the target â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                if (infected >= infectedToWin)
+                {
+                    _ended = true;
+                    GameManager.PlayerWon = true;
+                    UnityEngine.SceneManagement.SceneManager.LoadScene(
+                        FindObjectOfType<GameManager>()?.resultSceneName ?? "Result");
+                    return;
+                }
             }
 
-            // ‘SˆõŠ´õF”’l‚ğ“_–Å
+            // Pulse color when all mobs are infected
             if (_isAllInfected)
             {
                 _pulseTimer += Time.deltaTime * pulseFrequency * 2f * Mathf.PI;
@@ -105,138 +104,123 @@ namespace Mob
         }
 
         // ================================================================
-        //  •\¦XV
+        //  Display refresh
         // ================================================================
 
         private void RefreshDisplay(int infected, int total)
         {
-            _infectedText.text  = infected.ToString();
-            _totalText.text     = $"/ {total}";
+            _infectedText.text = infected.ToString();
+            _totalText.text = $"/ {infectedToWin}";
             _infectedText.color = _isAllInfected ? valueAllInfected : valueNormal;
 
-            // ƒo[‚Ì•‚ğ”ä—¦‚ÅXV
-            float ratio = total > 0 ? Mathf.Clamp01((float)infected / total) : 0f;
-            var barRt   = _barFill.rectTransform;
+            float ratio = infectedToWin > 0 ? Mathf.Clamp01((float)infected / infectedToWin) : 0f;
+            var barRt = _barFill.rectTransform;
             barRt.anchorMax = new Vector2(ratio, 1f);
         }
 
         // ================================================================
-        //  UI ©“®¶¬
+        //  UI construction
         // ================================================================
 
         private void BuildUI()
         {
-            // ---- CanvasiScreen Space Overlayj ----
+            // Canvas (Screen Space Overlay)
             var canvasGo = new GameObject("MobStatusHUD_Canvas");
             canvasGo.transform.SetParent(transform, false);
-
             var canvas = canvasGo.AddComponent<Canvas>();
-            canvas.renderMode   = RenderMode.ScreenSpaceOverlay;
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 100;
             canvasGo.AddComponent<CanvasScaler>();
             canvasGo.AddComponent<GraphicRaycaster>();
 
-            // ---- ƒpƒlƒ‹i”wŒij ----
-            var panelGo    = new GameObject("Panel");
+            // Panel background
+            var panelGo = new GameObject("Panel");
             panelGo.transform.SetParent(canvasGo.transform, false);
             var panelImage = panelGo.AddComponent<Image>();
             panelImage.color = panelBg;
-
-            var panelRt         = panelImage.rectTransform;
-            panelRt.anchorMin   = new Vector2(0.5f, 1f);
-            panelRt.anchorMax   = new Vector2(0.5f, 1f);
-            panelRt.pivot       = new Vector2(0.5f, 1f);
-            panelRt.sizeDelta   = new Vector2(panelWidth, panelHeight);
+            var panelRt = panelImage.rectTransform;
+            panelRt.anchorMin = new Vector2(0.5f, 1f);
+            panelRt.anchorMax = new Vector2(0.5f, 1f);
+            panelRt.pivot = new Vector2(0.5f, 1f);
+            panelRt.sizeDelta = new Vector2(panelWidth, panelHeight);
             panelRt.anchoredPosition = new Vector2(0f, -topOffset);
 
-            // ---- ˜güiƒAƒEƒgƒ‰ƒCƒ“—p‚Ì×‚¢ Imagej ----
+            // Border outline
             AddOutline(panelGo.transform, panelWidth, panelHeight, panelBorder);
 
-            // ---- ƒ‰ƒxƒ‹uŠ´õ”v----
-            var labelText        = AddText(panelGo.transform, "LabelInfected", "Š´õ”");
-            labelText.fontSize   = labelFontSize;
-            labelText.color      = labelColor;
-            labelText.alignment  = TextAnchor.MiddleCenter;
-            labelText.fontStyle  = FontStyle.Normal;
+            // "INFECTED" top label â€” stretches full width, top quarter of panel
+            var labelText = AddText(panelGo.transform, "LabelInfected", "INFECTED");
+            labelText.fontSize = fontSize;
+            labelText.color = labelColor;
+            labelText.alignment = TextAnchor.MiddleCenter;
             LayoutRT(labelText.rectTransform,
-                new Vector2(0f, 1f), new Vector2(1f, 1f),
-                new Vector2(0.5f, 1f),
-                new Vector2(0f, -8f),
-                new Vector2(panelWidth, 16f));
+                new Vector2(0f, 0.75f), new Vector2(1f, 1f),
+                new Vector2(0.5f, 0.5f),
+                Vector2.zero, Vector2.zero);
 
-            // ---- Š´õ”i‘åj ----
-            _infectedText        = AddText(panelGo.transform, "InfectedValue", "0");
-            _infectedText.fontSize  = valueFontSize;
-            _infectedText.color     = valueNormal;
+            // Infected count â€” left half, middle section
+            _infectedText = AddText(panelGo.transform, "InfectedValue", "0");
+            _infectedText.fontSize = fontSize;
+            _infectedText.color = valueNormal;
             _infectedText.fontStyle = FontStyle.Bold;
             _infectedText.alignment = TextAnchor.MiddleRight;
             LayoutRT(_infectedText.rectTransform,
-                new Vector2(0f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(1f, 0.5f),
-                new Vector2(-4f, -4f),
-                new Vector2(0f, 32f));
+                new Vector2(0f, 0.25f), new Vector2(0.5f, 0.75f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(-6f, 0f), Vector2.zero);
 
-            // ---- ‡Œv”i¬j ----
-            _totalText          = AddText(panelGo.transform, "TotalValue", "/ 0");
-            _totalText.fontSize = totalFontSize;
-            _totalText.color    = totalColor;
+            // "/ infectedToWin" â€” right half, middle section
+            _totalText = AddText(panelGo.transform, "TotalValue", $"/ {infectedToWin}");
+            _totalText.fontSize = fontSize;
+            _totalText.color = totalColor;
             _totalText.alignment = TextAnchor.MiddleLeft;
             LayoutRT(_totalText.rectTransform,
-                new Vector2(0.5f, 0.5f), new Vector2(1f, 0.5f),
-                new Vector2(0f, 0.5f),
-                new Vector2(4f, -4f),
-                new Vector2(0f, 32f));
+                new Vector2(0.5f, 0.25f), new Vector2(1f, 0.75f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(6f, 0f), Vector2.zero);
 
-            // ---- Š´õ—¦ƒo[i”wŒij ----
-            var barBgGo    = new GameObject("BarBg");
+            // Progress bar background
+            var barBgGo = new GameObject("BarBg");
             barBgGo.transform.SetParent(panelGo.transform, false);
             var barBgImage = barBgGo.AddComponent<Image>();
             barBgImage.color = barBg;
             LayoutRT(barBgImage.rectTransform,
-                Vector2.zero, new Vector2(1f, 0f),
-                Vector2.zero,
-                Vector2.zero,
-                new Vector2(0f, 3f));
+                new Vector2(0f, 0f), new Vector2(1f, 0.12f),
+                Vector2.zero, Vector2.zero, Vector2.zero);
 
-            // ---- Š´õ—¦ƒo[iFillj ----
-            var barFillGo   = new GameObject("BarFill");
+            // Progress bar fill
+            var barFillGo = new GameObject("BarFill");
             barFillGo.transform.SetParent(barBgGo.transform, false);
-            _barFill        = barFillGo.AddComponent<Image>();
-            _barFill.color  = valueNormal;
-
-            var fillRt      = _barFill.rectTransform;
+            _barFill = barFillGo.AddComponent<Image>();
+            _barFill.color = valueNormal;
+            var fillRt = _barFill.rectTransform;
             fillRt.anchorMin = Vector2.zero;
-            fillRt.anchorMax = Vector2.zero;   // ‰Šú‚Í 0%
+            fillRt.anchorMax = new Vector2(0f, 1f); // width=0 at start, full height
             fillRt.offsetMin = Vector2.zero;
             fillRt.offsetMax = Vector2.zero;
         }
 
         // ================================================================
-        //  ƒ†[ƒeƒBƒŠƒeƒB
+        //  Utilities
         // ================================================================
 
-        /// <summary>ƒpƒlƒ‹ŠO˜g‚ğ×‚¢ Image ‚Å•`‰æ‚·‚éB</summary>
         private static void AddOutline(Transform parent, float w, float h, Color color)
         {
-            var go    = new GameObject("Outline");
+            var go = new GameObject("Outline");
             go.transform.SetParent(parent, false);
-            var img   = go.AddComponent<Image>();
+            var img = go.AddComponent<Image>();
             img.color = color;
-
-            // Outline ‚Í 1px ‚Ì×ü‚È‚Ì‚ÅAMask ‚Å“à‘¤‚ğ”²‚­
-            var rt          = img.rectTransform;
-            rt.anchorMin    = Vector2.zero;
-            rt.anchorMax    = Vector2.one;
-            rt.offsetMin    = new Vector2(-1f, -1f);
-            rt.offsetMax    = new Vector2(1f, 1f);
-
-            // “à‘¤‚ğ“§–¾‚É‚·‚é‚½‚ß Mask + “à‘¤ Image ‚ğ’u‚­
+            var rt = img.rectTransform;
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = new Vector2(-1f, -1f);
+            rt.offsetMax = new Vector2(1f, 1f);
             go.AddComponent<Mask>().showMaskGraphic = true;
-            var innerGo     = new GameObject("OutlineInner");
+            var innerGo = new GameObject("OutlineInner");
             innerGo.transform.SetParent(go.transform, false);
-            var inner       = innerGo.AddComponent<Image>();
-            inner.color     = Color.clear;
-            var innerRt     = inner.rectTransform;
+            var inner = innerGo.AddComponent<Image>();
+            inner.color = Color.clear;
+            var innerRt = inner.rectTransform;
             innerRt.anchorMin = Vector2.zero;
             innerRt.anchorMax = Vector2.one;
             innerRt.offsetMin = new Vector2(1f, 1f);
@@ -245,7 +229,7 @@ namespace Mob
 
         private static Text AddText(Transform parent, string goName, string content)
         {
-            var go   = new GameObject(goName);
+            var go = new GameObject(goName);
             go.transform.SetParent(parent, false);
             var text = go.AddComponent<Text>();
             text.text = content;
@@ -256,15 +240,13 @@ namespace Mob
         private static void LayoutRT(
             RectTransform rt,
             Vector2 anchorMin, Vector2 anchorMax,
-            Vector2 pivot,
-            Vector2 anchoredPos,
-            Vector2 sizeDelta)
+            Vector2 pivot, Vector2 anchoredPos, Vector2 sizeDelta)
         {
-            rt.anchorMin        = anchorMin;
-            rt.anchorMax        = anchorMax;
-            rt.pivot            = pivot;
+            rt.anchorMin = anchorMin;
+            rt.anchorMax = anchorMax;
+            rt.pivot = pivot;
             rt.anchoredPosition = anchoredPos;
-            rt.sizeDelta        = sizeDelta;
+            rt.sizeDelta = sizeDelta;
         }
     }
 }

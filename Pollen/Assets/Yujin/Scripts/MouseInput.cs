@@ -37,12 +37,6 @@ public class CircleGestureInput : MonoBehaviour
     [Header("Event")]
     public UnityEvent OnCircleComplete;
 
-    [Header("Debug Visuals")]
-    public bool showDebug = true;
-    public Color trailColor = new Color(0.2f, 0.8f, 1f, 0.8f);
-    public Color circleColor = new Color(0f, 1f, 0.4f, 0.8f);
-    public Color flashColor = new Color(1f, 0.9f, 0f, 1f);
-
     // ── private ───────────────────────────────────────────────────────────────
     // Ring buffer — avoids List.RemoveAt(0) on every frame
     private Vector2[] _ring;
@@ -51,12 +45,9 @@ public class CircleGestureInput : MonoBehaviour
 
     private float _lastInputTime;
     private Vector2 _lastRecordedPoint;
-    private float _flashTimer;
     private float _cooldownTimer;
     private CircleFitResult _lastFit;
 
-    private static Material _mat;
-    private const int SEG = 64;
 
     // ─────────────────────────────────────────────────────────────────────────
     void Awake()
@@ -108,10 +99,8 @@ public class CircleGestureInput : MonoBehaviour
         float sweep = CalculateClockwiseSweep(window, _lastFit.center);
         if (sweep >= degreesRequired)
         {
-            _flashTimer = 0.35f;
             _cooldownTimer = detectionCooldown;
             OnCircleComplete?.Invoke();
-            Debug.Log($"[CircleGesture] Detected! sweep={sweep:F1}° r={_lastFit.radius:F1}px");
             ClearGesture();
         }
     }
@@ -209,83 +198,6 @@ public class CircleGestureInput : MonoBehaviour
         _lastFit = default;
     }
 
-    // ── GL debug visuals ──────────────────────────────────────────────────────
-    void OnRenderObject()
-    {
-        if (!showDebug || Camera.current != Camera.main) return;
-
-        EnsureMaterial();
-        _mat.SetPass(0);
-
-        GL.PushMatrix();
-        GL.LoadPixelMatrix(0, Screen.width, 0, Screen.height);
-        GL.Begin(GL.LINES);
-
-        bool flashing = _flashTimer > 0f;
-
-        // 1 — trail (ring buffer order)
-        if (_count >= 2)
-        {
-            GL.Color(flashing ? flashColor : trailColor);
-            for (int i = 1; i < _count; i++)
-            {
-                Vector2 a = _ring[(_head + i - 1) % windowSize];
-                Vector2 b = _ring[(_head + i) % windowSize];
-                GL.Vertex3(a.x, a.y, 0f);
-                GL.Vertex3(b.x, b.y, 0f);
-            }
-        }
-
-        // 2 — fitted circle ring
-        if (_count >= minPointsForGesture && _lastFit.radius >= minRadius)
-            DrawScreenCircle(_lastFit.center, _lastFit.radius, flashing ? flashColor : circleColor);
-
-        GL.End();
-        GL.PopMatrix();
-
-        if (_flashTimer > 0f) _flashTimer -= Time.deltaTime;
-    }
-
-    static void DrawScreenCircle(Vector2 center, float radius, Color color)
-    {
-        GL.Color(color);
-        for (int i = 0; i < SEG; i++)
-        {
-            float a0 = (i / (float)SEG) * Mathf.PI * 2f;
-            float a1 = ((i + 1) / (float)SEG) * Mathf.PI * 2f;
-            GL.Vertex3(center.x + Mathf.Cos(a0) * radius, center.y + Mathf.Sin(a0) * radius, 0f);
-            GL.Vertex3(center.x + Mathf.Cos(a1) * radius, center.y + Mathf.Sin(a1) * radius, 0f);
-        }
-    }
-
-    static void EnsureMaterial()
-    {
-        if (_mat != null) return;
-        _mat = new Material(Shader.Find("Hidden/Internal-Colored"))
-        { hideFlags = HideFlags.HideAndDontSave };
-        _mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-        _mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-        _mat.SetInt("_Cull", (int)UnityEngine.Rendering.CullMode.Off);
-        _mat.SetInt("_ZWrite", 0);
-        _mat.SetInt("_ZTest", (int)UnityEngine.Rendering.CompareFunction.Always);
-    }
-
-    // ── Editor HUD ────────────────────────────────────────────────────────────
-#if UNITY_EDITOR
-    void OnGUI()
-    {
-        if (!showDebug) return;
-        var style = new GUIStyle { normal = { textColor = Color.cyan }, fontSize = 14 };
-        GUI.Label(new Rect(10, 10, 500, 25), $"Window points: {_count} / {windowSize}", style);
-        if (_count >= minPointsForGesture && _lastFit.radius >= minRadius)
-        {
-            List<Vector2> w = GetWindow();
-            float sweep = CalculateClockwiseSweep(w, _lastFit.center);
-            GUI.Label(new Rect(10, 30, 500, 25),
-                $"Sweep: {sweep:F1}° / {degreesRequired}°   R: {_lastFit.radius:F1}px   StdDev: {CalculateRadiusStdDev(w, _lastFit.center, _lastFit.radius) / _lastFit.radius:F2}", style);
-        }
-    }
-#endif
 }
 
 public struct CircleFitResult

@@ -104,7 +104,7 @@ namespace Mob
             };
 
             _currentBehavior.OnEnter();
-            Debug.Log($"[MobController] Mode → {newMode}");
+            //Debug.Log($"[MobController] Mode → {newMode}");
         }
 
         public void AddPollen(float amount)    => _pollenGauge.Add(amount);
@@ -116,7 +116,7 @@ namespace Mob
         {
             if (!_pollenGauge.IsFull) return;
 
-            Debug.Log("[MobController] 花粉ゲージ満タン → Chase 開始（永続）");
+            //Debug.Log("[MobController] 花粉ゲージ満タン → Chase 開始（永続）");
 
             // 以降のゲージ変動を関知しない
             _pollenGauge.OnChanged -= HandlePollenChanged;

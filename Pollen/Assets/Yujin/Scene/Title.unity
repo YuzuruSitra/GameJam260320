@@ -216,7 +216,6 @@ RectTransform:
   m_Children:
   - {fileID: 534505362}
   - {fileID: 865433885}
-  - {fileID: 592480724}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -402,16 +401,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 592480723}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 106438847}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 960, y: 540}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &592480725
@@ -449,10 +448,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 1
-  showDebug: 1
-  trailColor: {r: 0.2, g: 0.8, b: 1, a: 0.8}
-  circleColor: {r: 0, g: 1, b: 0.4, a: 0.8}
-  flashColor: {r: 1, g: 0.9, b: 0, a: 1}
 --- !u!1 &685543654
 GameObject:
   m_ObjectHideFlags: 0
@@ -913,3 +908,4 @@ SceneRoots:
   - {fileID: 106438847}
   - {fileID: 373120573}
   - {fileID: 1459681759}
+  - {fileID: 592480724}
