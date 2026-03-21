@@ -1,3 +1,4 @@
+using Pollen;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -6,18 +7,10 @@ namespace Pollen
     /// <summary>
     /// 花粉の玉 1 個の挙動を管理する。
     ///
-    /// 動作:
-    ///   ・設定速度で直進方向に移動
-    ///   ・直進方向に対して垂直方向にサインカーブで揺れる
-    ///   ・Mob / Player に接触したら花粉ゲージを加算してプールへ返却
-    ///   ・カメラ外に出たらプールへ返却
-    ///
-    /// PollenSpawner が Get() 後に Init() を呼んで初期化する。
-    /// 消滅時は Destroy せず Release() でプールへ戻す。
-    ///
-    /// ---- 当たり判定の取得方法 ----
-    /// Collider2D の GameObject と PollenGauge の GameObject が
-    /// 必ずしも同一とは限らないため、GetComponentInParent で親階層まで検索する。
+    /// ---- 当たり判定モード ----
+    ///   HitTarget フラグで Player / Mob それぞれへの当たり判定を個別に制御できる。
+    ///   PollenTree から発射する場合は hitMob = false にすることで
+    ///   Mob には当たらず Player にのみ作用する友好弾として機能する。
     /// </summary>
     [RequireComponent(typeof(Collider2D))]
     public class PollenBall : MonoBehaviour
@@ -37,6 +30,10 @@ namespace Pollen
         private float _pollenForPlayer;
         private float _pollenForMob;
 
+        // ---- 当たり判定フラグ ----
+        private bool _hitPlayer;
+        private bool _hitMob;
+
         // ---- 内部状態 ----
         private Vector2 _perpendicular;
         private Vector2 _basePosition;
@@ -46,6 +43,11 @@ namespace Pollen
 
         // ========== 公開 API ==========
 
+        /// <summary>
+        /// 初期化メソッド。
+        /// hitPlayer / hitMob で当たり判定の対象を個別に制御できる。
+        /// デフォルトは両方 true（従来と同じ挙動）。
+        /// </summary>
         public void Init(
             IObjectPool<PollenBall> pool,
             Vector2 moveDirection,
@@ -53,7 +55,9 @@ namespace Pollen
             float   swayAmplitude,
             float   swayFrequency,
             float   pollenForPlayer,
-            float   pollenForMob)
+            float   pollenForMob,
+            bool    hitPlayer = true,
+            bool    hitMob    = true)
         {
             _pool             = pool;
             _moveDirection    = moveDirection.normalized;
@@ -63,6 +67,8 @@ namespace Pollen
             _swayPhaseOffset  = Random.Range(0f, 2f * Mathf.PI);
             _pollenForPlayer  = pollenForPlayer;
             _pollenForMob     = pollenForMob;
+            _hitPlayer        = hitPlayer;
+            _hitMob           = hitMob;
 
             _perpendicular = new Vector2(-_moveDirection.y, _moveDirection.x);
             _basePosition  = transform.position;
@@ -85,27 +91,25 @@ namespace Pollen
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            // コライダーが子 GameObject にある構成に対応するため
-            // GetComponentInParent で親階層まで含めて PollenGauge を検索する
-            if (other.CompareTag(TagPlayer))
+            if (_hitPlayer && other.CompareTag(TagPlayer))
             {
                 var gauge = other.GetComponentInParent<PollenGauge>();
                 if (gauge != null)
                     gauge.Add(_pollenForPlayer);
                 else
-                    Debug.LogWarning($"[PollenBall] '{other.name}' およびその親に PollenGauge が見つかりません。");
+                    Debug.LogWarning($"[PollenBall] '{other.name}' に PollenGauge が見つかりません。");
 
                 ReturnToPool();
                 return;
             }
 
-            if (other.CompareTag(TagMob))
+            if (_hitMob && other.CompareTag(TagMob))
             {
                 var gauge = other.GetComponentInParent<PollenGauge>();
                 if (gauge != null)
                     gauge.Add(_pollenForMob);
                 else
-                    Debug.LogWarning($"[PollenBall] '{other.name}' およびその親に PollenGauge が見つかりません。");
+                    Debug.LogWarning($"[PollenBall] '{other.name}' に PollenGauge が見つかりません。");
 
                 ReturnToPool();
             }

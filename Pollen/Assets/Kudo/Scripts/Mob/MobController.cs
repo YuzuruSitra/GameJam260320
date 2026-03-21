@@ -1,3 +1,4 @@
+using System;
 using Pollen;
 using UnityEngine;
 
@@ -42,6 +43,9 @@ namespace Mob
 
         public MobMode CurrentMode => _currentMode;
 
+        /// <summary>この Mob が破棄される直前に発火。MobGenerator が購読して総数を更新する。</summary>
+        public event Action<MobController> OnMobDestroyed;
+
         // ========== Unity ==========
 
         private void Awake()
@@ -66,8 +70,14 @@ namespace Mob
 
         private void OnDestroy()
         {
+            OnMobDestroyed?.Invoke(this);
+
             if (_pollenGauge != null)
                 _pollenGauge.OnChanged -= HandlePollenChanged;
+
+            // Chase 中だった場合は Registry から除外
+            if (_currentMode == MobMode.Chase && MobRegistry.Instance != null)
+                MobRegistry.Instance.Unregister(this);
         }
 
         // ========== Public API ==========
