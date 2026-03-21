@@ -43,6 +43,8 @@ namespace Mob
         private MobController _mobController;
         private MobAnimator _mobAnimator;
         private MouseFollowMovement _playerMovement;
+        private Animator _animator;
+        private SpriteRenderer _sr;
 
         // ── internal state ────────────────────────────────────────────────────
         private Vector2Int _lastAnimDir = Vector2Int.down;
@@ -60,6 +62,8 @@ namespace Mob
         {
             _mobController = GetComponent<MobController>();
             _mobAnimator = GetComponent<MobAnimator>();
+            _animator = GetComponent<Animator>();
+            _sr = GetComponent<SpriteRenderer>();
         }
 
         // ========== IMobBehavior ==========
@@ -74,19 +78,22 @@ namespace Mob
                 _targetTimer = targetUpdateInterval;
             }
 
+            bool isMoving = false;
+
             if (_followTarget != null)
             {
                 Vector2 toTarget = (Vector2)_followTarget.position - (Vector2)transform.position;
                 float distance = toTarget.magnitude;
 
-                if (distance <= stopDistance)
+                if (distance > stopDistance)
                 {
-                    _mobAnimator?.PlayIdle();
-                }
-                else
-                {
+                    isMoving = true;
                     Vector2 dir = toTarget.normalized;
                     transform.position += (Vector3)(dir * (CurrentSpeed * Time.deltaTime));
+
+                    // Flip sprite — face right = no flip, face left = flip
+                    if (_sr != null && Mathf.Abs(dir.x) > 0.01f)
+                        _sr.flipX = dir.x < 0f;
 
                     Vector2Int animDir = QuantizeDirection(dir);
                     if (animDir != _lastAnimDir)
@@ -96,6 +103,13 @@ namespace Mob
                     }
                 }
             }
+
+            // Drive Animator states
+            if (_animator != null)
+                _animator.SetBool("IsWalking", isMoving);
+
+            if (!isMoving)
+                _mobAnimator?.PlayIdle();
 
             // ── sneeze ────────────────────────────────────────────────────────
             _sneezeTimer -= Time.deltaTime;

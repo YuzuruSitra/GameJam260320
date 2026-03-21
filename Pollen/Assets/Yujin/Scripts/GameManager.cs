@@ -24,6 +24,10 @@ public class GameManager : MonoBehaviour
     [Tooltip("How many seconds the pollen must stay at max before triggering a loss.")]
     public float maxPollenLoseTime = 10f;
 
+    [Header("Lose Condition")]
+    [Tooltip("How many seconds the pollen must stay at max before triggering a loss.")]
+    public float maxPollenLoseValue = 90f;
+
     [Tooltip("(Optional) TMP label that shows the max-pollen danger timer counting down.")]
     public TMP_Text dangerLabel;
 
@@ -62,7 +66,7 @@ public class GameManager : MonoBehaviour
             timerLabel.text = FormatTime(_timeLeft);
 
         // ── Lose condition: pollen at max ─────────────────────────────────────
-        if (pollenGauge != null && pollenGauge.IsFull)
+        if (pollenGauge != null && pollenGauge.CurrentPollen >= maxPollenLoseValue)
         {
             _maxPollenTimer += Time.deltaTime;
 

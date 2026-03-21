@@ -113,7 +113,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 421afa57d9f584dee871a6224c0580e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Mob.PatrolBehavior
-  patrolRange: 3
+  patrolRange: 5
   secondsPerCell: 0.4
   waitInterval: 0.5
   minSteps: 1
@@ -136,6 +136,11 @@ MonoBehaviour:
   sneezePrefab: {fileID: 4062496106243499295, guid: aafe3e6e76368e24fa6e742abee04b38, type: 3}
   sneezeInterval: 1.5
   sneezeSpawnDistance: 0.6
+  sneezeIntervalVariance: 0.4
+  sneezeMinScale: 0.6
+  sneezeMaxScale: 1.4
+  sneezeMinCount: 1
+  sneezeMaxCount: 3
 --- !u!95 &7172371989268211797
 Animator:
   serializedVersion: 7
@@ -146,7 +151,7 @@ Animator:
   m_GameObject: {fileID: 900033872840720476}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: cd18b53dd03052946b3d55ae036597eb, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
